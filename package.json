@@ -1,0 +1,23 @@
+{
+	"name": "wm-makerspace-server",
+	"version": "0.0.1",
+	"description": "server for makerspace dashboard",
+	"main": "server.js",
+	"scripts": {
+		"start": "node server.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ajwells/wm-makerspace-server.git"
+	},
+	"author": "Aaron Wells",
+	"bugs": {
+		"url": "https://github.com/ajwells/wm-makerspace-server/issues"
+	},
+	"homepage": "https://github.com/ajwells/wm-makerspace-server#readme",
+	"dependencies": {
+		"express": "^4.13.4",
+		"cors": "^2.7.1",
+		"pg": "^4.5.2"
+	}
+}
