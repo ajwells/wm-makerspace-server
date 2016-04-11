@@ -10,7 +10,7 @@ var conString = "postgres://ajwells:ajwells@localhost/ajwells_company";
 
 app.get('/test', function(req, res) {
 	fetch('test')
-		.then(function(url) { req.send(url); })
+		.then(function(url) { res.send(url); })
 		.catch(function(err) { res.status(500).send(err); });
 });
 
