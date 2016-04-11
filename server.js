@@ -9,7 +9,7 @@ var PORT = 12000;
 var conString = "postgres://ajwells:ajwells@localhost/ajwells_company";
 
 app.get('/test', function(req, res) {
-	fetch(test)
+	fetch('test')
 		.then(function(url) { req.send(url); })
 		.catch(function(err) { res.status(500).send(err); });
 });
