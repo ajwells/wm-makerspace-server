@@ -4,28 +4,32 @@ var pg = require('pg');
 
 var app = express();
 app.use(cors());
-var PORT = 12000;
 
+var PORT = 12000;
 var conString = "postgres://ajwells:ajwells@localhost/ajwells_company";
 
-app.get('/test', function(req, res) {
-	fetch('test')
+app.get('/memberlist', function(req, res) {
+	var query = 'select * from employee';
+	fetch(query)
 		.then(function(url) { res.send(url); })
 		.catch(function(err) { res.status(500).send(err); });
+});
+
+app.get('/images/:name', function(req, res) {
+	var file = req.params.name;
+	var path = __dirname + '/images/matthew.png';
+	res.sendFile(path);
 });
 
 app.listen(PORT, function() {
 	console.log('Server listening on port:', PORT);
 });
 
-function fetch(type) {
+function fetch(query) {
 	return new Promise(function(resolve, reject) {
 		pg.connect(conString, function(err, client, done) {
 			if (err) return reject(err);
-			switch (type) {
-				case 'test':
-					var query = 'select * from employee';
-			}
+
 			client.query(query, function(error, result) {
 				done();
 				if (error) return reject(error);
