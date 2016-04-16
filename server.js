@@ -6,7 +6,7 @@ var app = express();
 app.use(cors());
 
 var PORT = 12000;
-var conString = "postgres://ajwells:ajwells@localhost/ajwells_company";
+var conString = "postgres://ajwells:ajwells@localhost:63333/ajwells_company";
 
 app.get('/memberlist', function(req, res) {
 	var query = 'select * from employee';
