@@ -15,6 +15,26 @@ app.get('/memberlist', function(req, res) {
 		.catch(function(err) { res.status(500).send(err); });
 });
 
+app.get('/member/:type/:id', function(req, res) {
+	var type = req.params.type;
+	var id = req.params.type;
+	var query;
+	switch(type) {
+		case 'skills':
+			query = 'select skill from skilled_in where member_id = ' + id + ';'
+		case 'certs':
+			query = 'select certificate from certified_in where member_id = ' + id + ';'
+		case 'interests':
+			query = 'select interest from interested_in where member_id = ' + id + ';'
+		case 'projects':
+			query = 'select projects from works_on natural join projects where member_id = ' + id + ';'
+			
+	}
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
 app.get('/images/:name', function(req, res) {
 	var file = req.params.name;
 	var path = __dirname + '/images/matthew.png';
