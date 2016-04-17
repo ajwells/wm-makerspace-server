@@ -17,18 +17,43 @@ app.get('/memberlist', function(req, res) {
 
 app.get('/member/:type/:id', function(req, res) {
 	var type = req.params.type;
-	var id = req.params.type;
+	var id = req.params.id;
 	var query;
 	switch(type) {
 		case 'skills':
 			query = 'select skill from skilled_in where member_id = ' + id + ';'
+			break;
 		case 'certs':
 			query = 'select certificate from certified_in where member_id = ' + id + ';'
+			break;
 		case 'interests':
 			query = 'select interest from interested_in where member_id = ' + id + ';'
+			break;
 		case 'projects':
-			query = 'select projects from works_on natural join projects where member_id = ' + id + ';'
+			query = 'select project_name from works_on natural join projects where member_id = ' + id + ';'
+			break;
 			
+	}
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
+app.get('/projectlist', function(req, res) {
+	var query = 'select project_id as id, project_name as name, budget, spent from projects;';
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
+app.get('/project/:type/:id', function(req, res) {
+	var type = req.params.type;
+	var id = req.params.id;
+	var query;
+	switch(type) {
+		case 'members':
+			var query = 'select member_id as id, name from member natural join (works_on natural join projects) where project_id =' + id + ';';
+			break;
 	}
 	fetch(query)
 		.then(function(url) { res.send(url); })
@@ -53,7 +78,7 @@ function fetch(query) {
 			client.query(query, function(error, result) {
 				done();
 				if (error) return reject(error);
-				resolve(result);
+				resolve(result.rows);
 			});
 		});
 	});
