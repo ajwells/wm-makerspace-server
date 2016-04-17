@@ -6,10 +6,10 @@ var app = express();
 app.use(cors());
 
 var PORT = 12000;
-var conString = "postgres://ajwells:ajwells@localhost:63333/ajwells_company";
+var conString = "postgres://ktdu:ktdu@localhost:63333/ktdu_makerspace";
 
 app.get('/memberlist', function(req, res) {
-	var query = 'select * from employee';
+	var query = 'select member_id as id, name, count(session_id) as visit, max(time_in) as last_visit from member natural join (visited natural join sessions) group by member_id;';
 	fetch(query)
 		.then(function(url) { res.send(url); })
 		.catch(function(err) { res.status(500).send(err); });
