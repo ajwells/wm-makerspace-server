@@ -1,0 +1,7 @@
+#!/usr/bin/expect
+
+set PASSWORD [lindex $argv 0]
+spawn ssh -L 63333:localhost:5432 ajwells@db.cs.wm.edu 
+expect "Password:" 
+send "$PASSWORD\n"
+interact
