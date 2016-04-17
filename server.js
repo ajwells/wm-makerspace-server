@@ -8,8 +8,33 @@ app.use(cors());
 var PORT = 12000;
 var conString = "postgres://ktdu:ktdu@localhost:63333/ktdu_makerspace";
 
+app.get('/makerspace/:type', function(req, res) {
+	var type = req.params.type;
+	var query;
+	switch(type) {
+		case 'current':
+			query = 'select member_id as id, name \
+				from member natural join (visited natural join sessions) \
+				where time_out = NULL;';
+			break;
+		case 'notcurrent':
+			query = '(select member_id as id, name \
+					from visited natural join member) \
+				except \
+				(select member_id as id, name \
+					from member natural join (visited natural join sessions) \
+					where time_out = NULL);';
+			break;
+	}
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
 app.get('/memberlist', function(req, res) {
-	var query = 'select member_id as id, name, count(session_id) as visit, max(time_in) as last_visit from member natural join (visited natural join sessions) group by member_id;';
+	var query = 'select member_id as id, name, count(session_id) as visit, max(time_in) as last_visit \
+			from member natural join (visited natural join sessions) \
+			group by member_id;';
 	fetch(query)
 		.then(function(url) { res.send(url); })
 		.catch(function(err) { res.status(500).send(err); });
@@ -21,16 +46,24 @@ app.get('/member/:type/:id', function(req, res) {
 	var query;
 	switch(type) {
 		case 'skills':
-			query = 'select skill from skilled_in where member_id = ' + id + ';'
+			query = 'select skill \
+				from skilled_in \
+				where member_id = ' + id + ';'
 			break;
 		case 'certs':
-			query = 'select certificate from certified_in where member_id = ' + id + ';'
+			query = 'select certificate \
+				from certified_in \
+				where member_id = ' + id + ';'
 			break;
 		case 'interests':
-			query = 'select interest from interested_in where member_id = ' + id + ';'
+			query = 'select interest \
+				from interested_in \
+				where member_id = ' + id + ';'
 			break;
 		case 'projects':
-			query = 'select project_name from works_on natural join projects where member_id = ' + id + ';'
+			query = 'select project_name \
+				from works_on natural join projects \
+				where member_id = ' + id + ';'
 			break;
 			
 	}
@@ -40,7 +73,8 @@ app.get('/member/:type/:id', function(req, res) {
 });
 
 app.get('/projectlist', function(req, res) {
-	var query = 'select project_id as id, project_name as name, budget, spent from projects;';
+	var query = 'select project_id as id, project_name as name, budget, spent \
+			from projects;';
 	fetch(query)
 		.then(function(url) { res.send(url); })
 		.catch(function(err) { res.status(500).send(err); });
@@ -52,7 +86,9 @@ app.get('/project/:type/:id', function(req, res) {
 	var query;
 	switch(type) {
 		case 'members':
-			var query = 'select member_id as id, name from member natural join (works_on natural join projects) where project_id =' + id + ';';
+			var query = 'select member_id as id, name \
+					from member natural join (works_on natural join projects) \
+					where project_id =' + id + ';';
 			break;
 	}
 	fetch(query)
