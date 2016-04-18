@@ -48,22 +48,22 @@ app.get('/member/:type/:id', function(req, res) {
 		case 'skills':
 			query = 'select skill \
 				from skilled_in \
-				where member_id = ' + id + ';'
+				where member_id = ' + id + ';';
 			break;
 		case 'certs':
 			query = 'select certificate \
 				from certified_in \
-				where member_id = ' + id + ';'
+				where member_id = ' + id + ';';
 			break;
 		case 'interests':
 			query = 'select interest \
 				from interested_in \
-				where member_id = ' + id + ';'
+				where member_id = ' + id + ';';
 			break;
 		case 'projects':
 			query = 'select project_name \
 				from works_on natural join projects \
-				where member_id = ' + id + ';'
+				where member_id = ' + id + ';';
 			break;
 			
 	}
@@ -89,6 +89,22 @@ app.get('/project/:type/:id', function(req, res) {
 			var query = 'select member_id as id, name \
 					from member natural join (works_on natural join projects) \
 					where project_id =' + id + ';';
+			break;
+	}
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
+app.get('/counts/:type', function(req, res) {
+	var type = req.params.type;
+	var query;
+	switch(type) {
+		case 'interest':
+			var query = 'select count(i.interest) as count, int.interest \
+					from interested_in as i, interested_in as int \
+					where i.member_id = int.member_id and i.interest = int.interest \
+					group by int.interest;';
 			break;
 	}
 	fetch(query)
