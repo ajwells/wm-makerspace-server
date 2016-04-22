@@ -8,6 +8,14 @@ app.use(cors());
 var PORT = 12000;
 var conString = "postgres://ktdu:ktdu@localhost:63333/ktdu_makerspace";
 
+app.get('/interestlist', function(req, res) {
+	var query = 'select distinct interest \
+			from interested_in;';
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
 app.get('/makerspace/:type', function(req, res) {
 	var type = req.params.type;
 	var query;
@@ -100,11 +108,23 @@ app.get('/counts/:type', function(req, res) {
 	var type = req.params.type;
 	var query;
 	switch(type) {
-		case 'interest':
-			var query = 'select count(i.interest) as count, int.interest \
+		case 'interests':
+			var query = 'select count(i.interest) as count, int.interest as item\
 					from interested_in as i, interested_in as int \
 					where i.member_id = int.member_id and i.interest = int.interest \
 					group by int.interest;';
+			break;
+		case 'certifications':
+			var query = 'select count(c.certificate) as count, ce.certificate as item\
+					from certified_in as c, certified_in as ce \
+					where c.member_id = ce.member_id and c.certificate = ce.certificate \
+					group by ce.certificate;';
+			break;
+		case 'skills':
+			var query = 'select count(s.skill) as count, sk.skill as item\
+					from skilled_in as s, skilled_in as sk \
+					where s.member_id = sk.member_id and s.skill = sk.skill \
+					group by sk.skill;';
 			break;
 	}
 	fetch(query)
