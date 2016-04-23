@@ -8,6 +8,23 @@ app.use(cors());
 var PORT = 12000;
 var conString = "postgres://ktdu:ktdu@localhost:63333/ktdu_makerspace";
 
+app.get('/time/:type', function(req, res) {
+	var type = req.params.type;
+	var query = "select time_in, time_out \
+			from visited natural join sessions \
+			where member_id IN ( \
+				(select member_id as id \
+				from skilled_in \
+				where skill = \'"+ type +"\') \
+			union \
+			(select member_id as id \
+			from certified_in \
+			where certificate = \'"+ type +"\'));";
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
 app.get('/interestlist', function(req, res) {
 	var query = 'select distinct interest \
 			from interested_in;';
