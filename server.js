@@ -8,9 +8,17 @@ app.use(cors());
 var PORT = 12000;
 var conString = "postgres://ktdu:ktdu@localhost:63333/ktdu_makerspace";
 
+app.get('/day', function(req, res) {
+	var query = "select extract(dow from time_in) as time_in, extract(dow from time_out) as time_out \
+			from sessions;";
+	fetch(query)
+		.then(function(url) { res.send(url); })
+		.catch(function(err) { res.status(500).send(err); });
+});
+
 app.get('/time/:type', function(req, res) {
 	var type = req.params.type;
-	var query = "select time_in, time_out \
+	var query = "select extract(hour from time_in) as time_in, extract(hour from time_out) as time_out \
 			from visited natural join sessions \
 			where member_id IN ( \
 				(select member_id as id \
@@ -38,17 +46,20 @@ app.get('/makerspace/:type', function(req, res) {
 	var query;
 	switch(type) {
 		case 'current':
-			query = 'select member_id as id, name \
+			query = 'select member_id as id, name, max(time_in) as last_visit \
 				from member natural join (visited natural join sessions) \
-				where time_out = NULL;';
+				where time_out = NULL \
+				group by member_id;';
 			break;
 		case 'notcurrent':
-			query = '(select member_id as id, name \
-					from visited natural join member) \
-				except \
-				(select member_id as id, name \
+			query = '(select member_id as id, name, max(time_in) as last_visit \
 					from member natural join (visited natural join sessions) \
-					where time_out = NULL);';
+					group by member_id) \
+				except \
+				(select member_id as id, name, max(time_in) as last_visit \
+					from member natural join (visited natural join sessions) \
+					where time_out = NULL \
+					group by member_id);';
 			break;
 	}
 	fetch(query)
