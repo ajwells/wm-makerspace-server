@@ -1,9 +1,11 @@
 var express = require('express');
 var cors = require('cors');
+var bodyParser = require('body-parser');
 var pg = require('pg');
 
 var app = express();
 app.use(cors());
+app.use(bodyParser.json());
 
 var PORT = 12000;
 var conString = "postgres://ktdu:ktdu@localhost:63333/ktdu_makerspace";
@@ -18,16 +20,27 @@ app.get('/day', function(req, res) {
 
 app.get('/time/:type', function(req, res) {
 	var type = req.params.type;
-	var query = "select extract(hour from time_in) as time_in, extract(hour from time_out) as time_out \
-			from visited natural join sessions \
-			where member_id IN ( \
+	if (type == 'all') {
+		var query = "select extract(hour from time_in) as time_in, extract(hour from time_out) as time_out \
+				from visited natural join sessions \
+				where member_id IN ( \
+					(select member_id as id \
+					from skilled_in) \
+					union \
+					(select member_id as id \
+					from certified_in));";
+	} else {
+		var query = "select extract(hour from time_in) as time_in, extract(hour from time_out) as time_out \
+				from visited natural join sessions \
+				where member_id IN ( \
+					(select member_id as id \
+					from skilled_in \
+					where skill = \'"+ type +"\') \
+				union \
 				(select member_id as id \
-				from skilled_in \
-				where skill = \'"+ type +"\') \
-			union \
-			(select member_id as id \
-			from certified_in \
-			where certificate = \'"+ type +"\'));";
+				from certified_in \
+				where certificate = \'"+ type +"\'));";
+	}
 	fetch(query)
 		.then(function(url) { res.send(url); })
 		.catch(function(err) { res.status(500).send(err); });
@@ -162,8 +175,40 @@ app.get('/counts/:type', function(req, res) {
 
 app.get('/images/:name', function(req, res) {
 	var file = req.params.name;
-	var path = __dirname + '/images/matthew.png';
+	var path = __dirname + '/images/' + file;
 	res.sendFile(path);
+});
+
+app.post('/new/:type', function(req, res) {
+	var type = req.params.type;
+	var data = req.body;
+	console.log(type);
+	console.log(req.body);
+	res.send('ok');
+});
+
+app.delete('/delete/:type/:id/:item', function(req, res) {
+	var type = req.params.type;
+	var id = req.params.id;
+	var item = req.params.item;
+	var query
+	switch(type) {
+		case 'interest':
+			query = 'delete from interested_in \
+				where member_id = ' + id + ' and interest = \'' + item + '\';';
+			break;
+		case 'skill':
+			query = 'delete from skilled_in \
+				where member_id = ' + id + ' and skill = \'' + item + '\';';
+			break;
+		case 'certification':
+			query = 'delete from certified_in \
+				where member_id = ' + id + ' and certificate = \'' + item + '\';';
+			break;
+	}
+	fetch(query)
+		.then(function() { res.send('ok'); })
+		.catch(function(err) { res.status(500).send(err); });
 });
 
 app.listen(PORT, function() {
