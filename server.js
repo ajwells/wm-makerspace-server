@@ -7,8 +7,8 @@ var app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-var PORT = 12000;
-var conString = "postgres://ktdu:ktdu@localhost:63333/ktdu_makerspace";
+var PORT = 13000;
+var conString = "postgres://ktdu:ktdu@localhost:5432/ktdu_makerspace";
 
 app.get('/day', function(req, res) {
 	var query = "select extract(dow from time_in) as time_in, extract(dow from time_out) as time_out \
